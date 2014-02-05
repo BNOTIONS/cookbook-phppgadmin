@@ -52,7 +52,7 @@ when "nginx"
   ###
   # Make this more self-contained, use the Nginx cookbook if you need more
   # control over the nginx config.
-  unless node["recipes"].include? "nginx"
+  unless node[:recipes].include? "nginx"
     package "nginx" do
       action :install
     end
