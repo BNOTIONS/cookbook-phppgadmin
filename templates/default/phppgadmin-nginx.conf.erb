@@ -1,20 +1,28 @@
  server {
-   listen          *:<%= node[:phppgadmin][:port] %>;
-   server_name     <%= node[:phppgadmin][:hostname] %>;
-   access_log      <%= node[:phppgadmin][:log_dir] %>/nginx.access.log;
-   error_log      <%= node[:phppgadmin][:log_dir] %>/nginx.error.log;
+   listen <%= node[:phppgadmin][:port] %>;
+   server_name <%= node[:phppgadmin][:server_name] %>;
+   access_log <%= node[:phppgadmin][:log_dir] %>/nginx.access.log;
+   error_log <%= node[:phppgadmin][:log_dir] %>/nginx.error.log;
+   <% if node[:phppgadmin][:use_ssl] %>
+   ssl on;
+   ssl_certificate <%= node[:phppgadmin][:ssl_certificate] %>;
+   ssl_certificate_key <%= node[:phppgadmin][:ssl_certificate_key] %>;
+   <% end %>
    
    location / {
-     root    /usr/share/phppgadmin;
-     index   index.html index.htm index.php;
+     root /usr/share/phppgadmin;
+     index index.html index.htm index.php;
+     <% if node[:phppgadmin][:htpasswd][:username] %>
+     auth_basic "Restricted";
+     auth_basic_user_file phppgadmin-htpasswd;
+     <% end %>
    }
    
    location ~ \.php$ {
-     root            /usr/share/phppgadmin;
-     fastcgi_pass    127.0.0.1:9000;
-     # fastcgi_pass    unix:/var/run/php-fpm/php-fpm.sock;
-     fastcgi_index   index.php;
-     fastcgi_param   SCRIPT_FILENAME  /usr/share/phppgadmin/$fastcgi_script_name;
-     include         fastcgi_params;
+     root /usr/share/phppgadmin;
+     fastcgi_pass unix:/var/run/php-fpm-phppgadmin.sock;
+     fastcgi_index index.php;
+     fastcgi_param SCRIPT_FILENAME  /usr/share/phppgadmin/$fastcgi_script_name;
+     include fastcgi_params;
    }
  }

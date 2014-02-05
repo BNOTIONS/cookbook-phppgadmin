@@ -17,17 +17,43 @@
 # limitations under the License.
 #
 
-package 'phppgadmin' do
+include_recipe "php-fpm"
+
+package "php5-pgsql" do
   action :install
 end
 
+package "phppgadmin" do
+  action :install
+end
+
+package "apache2-utils" do
+  action :install
+  not_if { node[:phppgadmin][:htpasswd][:username].nil? }
+end
+
+php_fpm_pool "phppgadmin" do
+  process_manager "static"
+  max_children node[:cpu][:total] * 2
+  max_request 2048
+  php_options ({
+    'php_admin_flag[log_errors]' => 'on',
+    'php_admin_value[memory_limit]' => '64M',
+    'chdir' => '/usr/share/phppgadmin'
+  })
+end
+
+service "php-fpm" do
+  action :reload
+end
+
 case node[:phppgadmin][:webserver]
-when 'nginx'
+when "nginx"
   ###
   # Make this more self-contained, use the Nginx cookbook if you need more
   # control over the nginx config.
-  unless node['recipes'].include? 'nginx'
-    package 'nginx' do
+  unless node["recipes"].include? "nginx"
+    package "nginx" do
       action :install
     end
     
@@ -39,21 +65,24 @@ when 'nginx'
   #
   ###
 
-  package "php5-fpm" do
-    action :install
+  execute "htpasswd" do
+    user "root"
+    group "root"
+    command "htpasswd -cmb /etc/nginx/phppgadmin-htpasswd '#{node[:phppgadmin][:htpasswd][:username]}' '#{node[:phppgadmin][:htpasswd][:password]}'"
+    not_if { node[:phppgadmin][:htpasswd][:username].nil? }
   end
-  
+
   template "/etc/nginx/sites-available/phppgadmin.conf" do
     source "phppgadmin-nginx.conf.erb"
     owner "root"
     group "root"
-    mode "0640"
+    mode 00644
   end
 
   directory node[:phppgadmin][:log_dir] do
     owner "root"
     group "root"
-    mode "0755"    
+    mode 00755    
     action :create
   end
 

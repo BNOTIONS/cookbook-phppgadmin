@@ -17,7 +17,15 @@
 # limitations under the License.
 #
 
-default[:phppgadmin][:webserver] = "nginx"
+default[:phppgadmin][:webserver] = 'nginx'
 default[:phppgadmin][:port] = 4000
-default[:phppgadmin][:hostname] = 'localhost'
+default[:phppgadmin][:server_name] = 'localhost'
+
 default[:phppgadmin][:log_dir] = '/var/log/phppgadmin'
+
+default[:phppgadmin][:use_ssl] = false
+default[:phppgadmin][:ssl_certificate] = nil
+default[:phppgadmin][:ssl_certificate_key] = nil
+
+default[:phppgadmin][:htpasswd][:username] = nil
+default[:phppgadmin][:htpasswd][:password] = nil
