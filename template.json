@@ -1,0 +1,47 @@
+{
+  "builders": [
+    {
+      "name": "phppgadmin",
+      "type": "docker",
+      "image": "ubuntu:precise",
+      "export_path": "phppgadmin-docker.tar"
+    }
+  ],
+  "provisioners": [
+    {
+      "type": "shell",
+      "inline": [
+        "sudo apt-get update",
+        "sleep 10",
+        "sudo apt-get install -y curl"
+      ]
+    },
+    {
+      "type": "chef-solo",
+      "cookbook_paths": ["cookbooks"],
+      "run_list": [
+        "recipe[nginx]",
+        "recipe[phppgadmin]"
+      ],
+      "json": {
+        "nginx": {
+          "default_site_enabled": false
+        },
+        "php-fpm": {
+          "pools": false
+        },
+        "phppgadmin": {
+          "port": 80
+        }
+      }
+    },
+    {
+      "type": "shell",
+      "inline": [
+        "sudo rm -rf /opt/chef /var/lib/chef /tmp/*",
+        "sudo apt-get remove -y curl",
+        "sudo apt-get autoremove -y"
+      ]
+    }
+  ]
+}
