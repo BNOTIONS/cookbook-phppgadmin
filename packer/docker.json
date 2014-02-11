@@ -4,7 +4,7 @@
       "name": "phppgadmin",
       "type": "docker",
       "image": "ubuntu:precise",
-      "export_path": "phppgadmin-docker.tar"
+      "export_path": "docker.tar"
     }
   ],
   "provisioners": [

@@ -6,10 +6,13 @@ Berksfile.lock
 \#*#
 .*.sw[a-z]
 *.un~
-/cookbooks
 
 # Bundler
 Gemfile.lock
 bin/*
 .bundle/*
 
+# packer
+/packer/cookbooks
+/packer/packer_cache
+/packer/*.tar
